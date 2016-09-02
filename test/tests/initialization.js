@@ -12,7 +12,6 @@ const makeStatus = require('../../lib');
 describe('makeStatus(schema, options)', function () {
 
   var ASSETS;
-  var ResourceModel;
 
   beforeEach(function () {
     return aux.setup()
@@ -52,5 +51,28 @@ describe('makeStatus(schema, options)', function () {
         statuses: undefined
       });
     });
+  });
+
+  it('should throw error upon schema property conflict', function () {
+    assert.throws(function () {
+      var schema = new mongoose.Schema({
+        // status is the default property
+        status: String,
+      });
+
+      makeStatus(schema, { statuses: ['status1', 'status2'] });
+    });
+
+    assert.throws(function () {
+      var schema = new mongoose.Schema({
+        prefixedStatus: String,
+      });
+
+      makeStatus(schema, {
+        prefix: 'prefixed',
+        statuses: ['status1', 'status2']
+      });
+    });
+
   });
 });
