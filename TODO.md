@@ -1,0 +1,1 @@
+- make it work as a mongoose plugin http://mongoosejs.com/docs/plugins.html
