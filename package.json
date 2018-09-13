@@ -2,6 +2,10 @@
   "name": "@habemus/mongoose-plugin-status",
   "version": "1.0.0",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/habemus/mongoose-plugin-status"
+  },
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
