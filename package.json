@@ -1,6 +1,6 @@
 {
-  "name": "mongoose-make-status",
-  "version": "1.0.0-beta",
+  "name": "@habemus/mongoose-plugin-status",
+  "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "clone": "^1.0.2",
     "mongoose": "^4.5.10"
   },
   "devDependencies": {
