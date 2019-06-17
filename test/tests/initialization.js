@@ -21,7 +21,7 @@ describe('makeStatus(schema, options)', function () {
   });
 
   afterEach(function () {
-    return aux.teardown();
+    return aux.teardown(ASSETS);
   });
 
   it('should require the first argument to be instanceof mongoose.Schema', function () {

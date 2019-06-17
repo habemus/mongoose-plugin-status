@@ -1,76 +1,69 @@
 // third-party dependencies
-const MongoClient = require('mongodb').MongoClient;
-const mongoose = require('mongoose');
+const MongoClient = require('mongodb').MongoClient
+const mongoose = require('mongoose')
 
 // constant
-const TEST_DB_URI = 'mongodb://localhost:27017/mongoose-make-status-test-db';
+const TEST_DB = 'mongoose-make-status-test-db'
+const TEST_DB_URI = 'mongodb://localhost:27017/mongoose-make-status-test-db'
 
 // set mongoose to debug mode
 if (process.env.DEBUG === 'TRUE') {
   mongoose.set('debug', true);
 }
 
-var TEARDOWN_CALLBACKS = [];
+const setupMongoClient = () => {
+  return MongoClient.connect(TEST_DB_URI).then(client => {
+    const db = client.db(TEST_DB)
+    return db.dropDatabase().then(() => ({
+      db,
+      mongoDbClient: client
+    }))
+  })
+}
 
-exports.TEST_DB_URI = TEST_DB_URI;
+const setupMongoose = (mongodbUri = TEST_DB_URI) => {
+  return new Promise((resolve, reject) => {
+    const connection = mongoose.createConnection(mongodbUri, { useNewUrlParser: true })
 
-/**
- * Sets up an assets object that is ready for the tests
- * @return {[type]} [description]
- */
-exports.setup = function () {
+    const _resolve = () => {
+      connection.removeListener('open', _resolve)
+      resolve({
+        mongooseConnection: connection
+      })
+    }
 
-  var _assets = {
-    dbURI: TEST_DB_URI,
-  };
+    const _reject = err => {
+      connection.removeListener('error', _reject)
+      reject(err)
+    }
 
+    connection.on('open', _resolve)
+    connection.on('error', _reject)
+  })
+}
+
+
+const setup = () => {
   return Promise.all([
-      MongoClient.connect(TEST_DB_URI),
-      mongoose.createConnection(TEST_DB_URI),
-    ])
-    .then((results) => {
+    setupMongoClient(),
+    setupMongoose()
+  ])
+  .then(([mongoClientAssets, mongooseAssets]) => {
+    return Object.assign({}, mongoClientAssets, mongooseAssets)
+  })
+}
 
-      _assets.db = results[0];
-      _assets.mongooseConnection = results[1];
+const teardown = assets => {
+  return Promise.all([
+    assets.db.dropDatabase().then(() => assets.mongoDbClient.close()),
+    assets.mongooseConnection.close()
+  ])
+  .then(() => {})
+}
 
-      // register mongoose connection teardown
-      exports.registerTeardown(function () {
-        return _assets.mongooseConnection.close();
-      });
-
-      // register database teardown
-      exports.registerTeardown(function () {
-        return _assets.db.dropDatabase().then(() => {
-          return _assets.db.close();
-        });
-      });
-
-      return Promise.all([
-        _assets.db.dropDatabase(),
-      ]);
-    })
-    .then(() => {
-      return _assets;
-    });
-
-};
-
-/**
- * Register a teardown function to be executed by the teardown
- * The function should return a promise
- */
-exports.registerTeardown = function (teardown) {
-  TEARDOWN_CALLBACKS.push(teardown);
-};
-
-/**
- * Executes all functions listed at TEARDOWN_CALLBACKS
- */
-exports.teardown = function () {
-  return Promise.all(TEARDOWN_CALLBACKS.map((fn) => {
-    return fn();
-  }))
-  .then(() => {
-    TEARDOWN_CALLBACKS = [];
-  });
-};
+module.exports = {
+  TEST_DB,
+  TEST_DB_URI,
+  setup,
+  teardown,
+}

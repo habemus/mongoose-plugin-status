@@ -34,7 +34,7 @@ describe('makeStatus unprefixed', function () {
   });
 
   afterEach(function () {
-    return aux.teardown();
+    return aux.teardown(ASSETS);
   });
 
   describe('setStatus(status, reason, options)', function () {

@@ -35,7 +35,7 @@ describe('makeStatus prefixed', function () {
   });
 
   afterEach(function () {
-    return aux.teardown();
+    return aux.teardown(ASSETS);
   });
 
   describe('setBillingStatus(status, reason, options)', function () {
